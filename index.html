@@ -142,7 +142,7 @@ button,input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink)
 .grid{gap:14px}.card{background-color:var(--card);background-image:linear-gradient(158deg,var(--cardg1),var(--cardg2));border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sd);padding:14px 16px;position:relative;overflow:visible}
 .card::after{display:none}.card h3{font-family:var(--ffk);font-size:16px;font-weight:700;margin:0 0 10px}.subtle{color:var(--ink2);font-size:12.5px}
 .seal{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:1.5px solid var(--accent);color:var(--accent);border-radius:4px;font-family:var(--ffk);font-size:13px;transform:none}
-.todo-seal{width:auto;min-width:38px;height:24px;padding:0 7px;white-space:nowrap;writing-mode:horizontal-tb;line-height:1;flex:0 0 auto;letter-spacing:0}.todo-type{font-size:11px;padding:2px 6px;margin-right:5px;vertical-align:middle;white-space:nowrap}
+.todo-seal{width:auto;min-width:38px;height:24px;padding:0 7px;white-space:nowrap;writing-mode:horizontal-tb;line-height:1;flex:0 0 auto;letter-spacing:0}.todo-type{font-size:11px;padding:2px 6px;margin-right:5px;vertical-align:middle;white-space:nowrap}.home-todo-scroll,.home-countdown-scroll{overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:4px}.home-todo-scroll{max-height:286px}.home-countdown-scroll{max-height:248px}.home-todo-scroll::-webkit-scrollbar,.home-countdown-scroll::-webkit-scrollbar{width:6px}.home-todo-scroll::-webkit-scrollbar-thumb,.home-countdown-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:999px}.home-todo-scroll::-webkit-scrollbar-track,.home-countdown-scroll::-webkit-scrollbar-track{background:transparent}
 
 /* 按钮、标签、表单 */
 .iconbtn,.btn{border:1px solid var(--line);background:var(--card);padding:5px 12px;border-radius:var(--r);font-size:13px;color:var(--ink);display:inline-flex;align-items:center;gap:5px;transition:.15s;box-shadow:none}
@@ -398,6 +398,12 @@ function homeTodoItems(){
   Object.entries(DB.projects||{}).forEach(([cat,p])=>(p.tasks||[]).forEach(t=>items.push({...t,time:'',_source:'project',_cat:cat,type:projectTodoType(cat)})));
   return items.sort((a,b)=>(a.done-b.done)||(`${a.deadline||'9999-12-31'}${a.time||'23:59'}`).localeCompare(`${b.deadline||'9999-12-31'}${b.time||'23:59'}`));
 }
+function homeTodoExpired(t,now=new Date()){
+  if(!t||t.done||!t.deadline)return false;
+  const dt=new Date(`${t.deadline}T${t._source==='project'?'23:59':(t.time||'23:59')}`);
+  return !Number.isNaN(dt.getTime())&&dt<now;
+}
+function visibleHomeTodoItems(now=new Date()){return homeTodoItems().filter(t=>!t.done&&!homeTodoExpired(t,now))}
 function toggleHomeTodo(source,id,cat=''){
   if(source==='project'){
     const a=DB.projects?.[cat]?.tasks||[],t=a.find(x=>x.id===id);if(!t)return;
@@ -405,6 +411,27 @@ function toggleHomeTodo(source,id,cat=''){
     if(!was&&t.done&&t.repeat&&t.repeat!=='none'){const d=new Date(t.deadline+'T00:00:00');d.setDate(d.getDate()+(t.repeat==='daily'?1:7));const nd=isoDate(d);if(!a.some(x=>x.title===t.title&&x.deadline===nd&&!x.done))a.push({id:uid(),title:t.title,deadline:nd,repeat:t.repeat,done:false})}
   }else{const t=(DB.todos||[]).find(x=>x.id===id);if(!t)return;t.done=!t.done}
   save(true);renderHome()
+}
+function editHomeTodo(source,id,cat=''){
+  if(source==='project'){
+    const t=(DB.projects?.[cat]?.tasks||[]).find(x=>x.id===id);if(!t)return;
+    modal('编辑项目待办',`<div class="field"><label>任务</label><input id="mTitle" value="${esc(t.title||'')}"></div><div class="field"><label>类型</label><input value="${esc(projectTodoType(cat))}" disabled><div class="subtle" style="margin-top:5px">项目类型由“${esc(cat)}”自动决定</div></div><div class="grid two"><div class="field"><label>截止日期</label><input id="mDate" type="date" value="${esc(t.deadline||'')}"></div><div class="field"><label>重复</label><select id="mRepeat"><option value="none" ${t.repeat==='none'||!t.repeat?'selected':''}>不重复</option><option value="daily" ${t.repeat==='daily'?'selected':''}>每日</option><option value="weekly" ${t.repeat==='weekly'?'selected':''}>每周</option></select></div></div>`,`<button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="commitHomeTodoEdit('project','${id}','${cat}')">保存</button>`)
+  }else{
+    const t=(DB.todos||[]).find(x=>x.id===id);if(!t)return;
+    modal('编辑待办',`<div class="field"><label>任务</label><input id="mTitle" value="${esc(t.title||'')}"></div><div class="field"><label>类型（必选）</label><select id="mTodoType">${TODO_TYPES.map(x=>`<option value="${x}" ${t.type===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="grid two"><div class="field"><label>截止日期</label><input id="mDate" type="date" value="${esc(t.deadline||'')}"></div><div class="field"><label>截止时间</label><input id="mTime" type="time" value="${esc(t.time||'17:00')}"></div></div>`,`<button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="commitHomeTodoEdit('todo','${id}','')">保存</button>`)
+  }
+}
+function commitHomeTodoEdit(source,id,cat=''){
+  const title=$('#mTitle')?.value.trim();if(!title)return toast('请填写任务');
+  if(source==='project'){
+    const t=(DB.projects?.[cat]?.tasks||[]).find(x=>x.id===id);if(!t)return;
+    t.title=title;t.deadline=$('#mDate')?.value||'';t.repeat=$('#mRepeat')?.value||'none';
+  }else{
+    const t=(DB.todos||[]).find(x=>x.id===id);if(!t)return;
+    const type=$('#mTodoType')?.value||'';if(!TODO_TYPES.includes(type))return toast('请选择任务类型');
+    t.title=title;t.type=type;t.deadline=$('#mDate')?.value||'';t.time=$('#mTime')?.value||'';
+  }
+  save(true);closeModal();renderHome();toast('待办已更新')
 }
 function deleteHomeTodo(source,id,cat=''){
   if(source==='project'){const a=DB.projects?.[cat]?.tasks||[],i=a.findIndex(x=>x.id===id);if(i<0)return;askConfirm('删除这条项目待办？',()=>{pushRecycle('projectTask',a[i],{cat});a.splice(i,1);save(true);renderHome();toast('已移入回收站')})}
@@ -414,15 +441,14 @@ function renderHome(){
   const n=new Date(),week=getWeek(),prog=semesterProgress(),day=(n.getDay()+6)%7,ds=today();
   const todays=[];for(let p=1;p<=11;p++)todays.push(...effectiveEntriesForDate(week,day,p));
   const activeToday=todays.filter(e=>!e._holiday&&!e._stopped);
-  const overdue=t=>!t.done&&new Date(`${t.deadline}T${t.time||'23:59'}`)<n;
   let lessonCount=0;for(let d=0;d<7;d++)for(let p=1;p<=11;p++)lessonCount+=effectiveEntriesForDate(week,d,p).filter(e=>!e._holiday&&!e._stopped).length;
   const countdowns=DB.holidays.slice().sort((a,b)=>{const da=daysLeft(a.date),db=daysLeft(b.date),af=da>=0,bf=db>=0;if(af!==bf)return af?-1:1;return af?da-db:db-da});
   const soonSpecial=(DB.schedule.specialDays||[]).filter(x=>{const d=daysLeft(x.date);return d>=0&&d<=7}).sort((a,b)=>a.date.localeCompare(b.date));
-  const todoItems=homeTodoItems(),unfinishedTodos=todoItems.filter(x=>!x.done).length;
+  const todoItems=visibleHomeTodoItems(n),unfinishedTodos=todoItems.length;
   $('#content').innerHTML=`<div class="hero"><div><div class="hero-date">${n.getFullYear()}年${n.getMonth()+1}月${n.getDate()}日</div><div class="hero-meta"><span class="pill">第 ${week} 教学周</span><span class="pill">${DB.settings.school||'未设置学校'}</span><span class="pill">学期进度 ${prog}%</span></div></div><div class="hero-time" id="clock">${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}</div></div>
   <div class="grid four"><div class="card metric"><span class="subtle">本周课量</span><b>${lessonCount} 节</b></div><div class="card metric"><span class="subtle">今日课程</span><b>${activeToday.length} 节</b></div><div class="card metric"><span class="subtle">未完成待办</span><b>${unfinishedTodos} 项</b></div><div class="card metric"><span class="subtle">学期进度</span><b>${prog}%</b><div class="progress"><i style="width:${prog}%"></i></div></div></div>
-  <div class="grid two" style="margin-top:16px"><div class="card"><div class="toolbar"><h3 style="margin:0">To do list</h3><span class="seal todo-seal">待办</span><span class="spacer"></span><button class="btn primary small" onclick="addTodo()">新增任务</button></div><div class="todo-list">${todoItems.length?todoItems.map(t=>`<div class="todo ${overdue(t)?'overdue':''} ${t.done?'done':''}"><button class="check ${t.done?'on':''}" onclick="toggleHomeTodo('${t._source}','${t.id}','${t._cat||''}')">${t.done?'✓':''}</button><div class="todo-main"><div class="todo-title">${esc(t.title)}</div><div class="todo-meta"><span class="pill todo-type">${esc(t.type||'未分类')}</span> 截止 ${esc(t.deadline||'未设日期')} ${esc(t.time||'')}${t._source==='project'?` · 来自${esc(t._cat)}`:''}</div></div><button class="btn small red" onclick="deleteHomeTodo('${t._source}','${t.id}','${t._cat||''}')">删除</button></div>`).join(''):empty('暂无任务，点击新增')}</div></div>
-  <div class="card"><div class="toolbar"><h3 style="margin:0">假期倒计时</h3><span class="seal">盼</span><span class="spacer"></span><button class="btn small" onclick="addHoliday()">新增</button></div>${countdowns.length?countdowns.map(h=>{const d=daysLeft(h.date);return `<div class="countdown"><div><b>${esc(h.name)}</b><div class="subtle">${esc(h.date)}</div></div><div class="countdown-actions"><div class="days">${d>=0?d+'天':'已过'}</div><button class="btn small red" onclick="deleteHoliday('${h.id}')">删除</button></div></div>`}).join(''):empty()}</div></div>
+  <div class="grid two" style="margin-top:16px"><div class="card"><div class="toolbar"><h3 style="margin:0">To do list</h3><span class="seal todo-seal">待办</span><span class="spacer"></span><button class="btn primary small" onclick="addTodo()">新增任务</button></div><div class="todo-list home-todo-scroll">${todoItems.length?todoItems.map(t=>`<div class="todo"><button class="check" onclick="toggleHomeTodo('${t._source}','${t.id}','${t._cat||''}')"></button><div class="todo-main"><div class="todo-title">${esc(t.title)}</div><div class="todo-meta"><span class="pill todo-type">${esc(t.type||'未分类')}</span> 截止 ${esc(t.deadline||'未设日期')} ${esc(t.time||'')}${t._source==='project'?` · 来自${esc(t._cat)}`:''}</div></div><div class="mini-actions"><button class="btn small" onclick="editHomeTodo('${t._source}','${t.id}','${t._cat||''}')">编辑</button><button class="btn small red" onclick="deleteHomeTodo('${t._source}','${t.id}','${t._cat||''}')">删除</button></div></div>`).join(''):empty('暂无未完成且未过期的任务')}</div></div>
+  <div class="card"><div class="toolbar"><h3 style="margin:0">假期倒计时</h3><span class="seal">盼</span><span class="spacer"></span><button class="btn small" onclick="addHoliday()">新增</button></div><div class="home-countdown-scroll">${countdowns.length?countdowns.map(h=>{const d=daysLeft(h.date);return `<div class="countdown"><div><b>${esc(h.name)}</b><div class="subtle">${esc(h.date)}</div></div><div class="countdown-actions"><div class="days">${d>=0?d+'天':'已过'}</div><button class="btn small red" onclick="deleteHoliday('${h.id}')">删除</button></div></div>`}).join(''):empty()}</div></div></div>
   <div class="card" style="margin-top:16px"><div class="toolbar"><h3 style="margin:0">近期调休 / 特殊教学日</h3><span class="seal">调</span><span class="spacer"></span><button class="btn small" onclick="go('schedule');setTimeout(()=>openSpecialDayManager(),0)">管理</button></div>${soonSpecial.length?soonSpecial.map(x=>`<div class="special-summary"><div><b>${esc(x.date)} · ${esc(specialTypeLabel(x.type))}</b><div class="subtle">${esc(specialDayRecordLabel(x))}${x.note?` · ${esc(x.note)}`:''}</div></div><span class="pill">${daysLeft(x.date)===0?'今天':daysLeft(x.date)+'天后'}</span></div>`).join(''):empty('未来7天暂无调休或特殊教学日')}</div>
   <div class="grid two" style="margin-top:16px"><div class="card"><div class="toolbar"><h3 style="margin:0">今日课表</h3><span class="spacer"></span><button class="btn small" onclick="go('schedule')">查看课表</button></div>${todays.length?todays.map(e=>`<div class="schedule-today" style="${(e._holiday||e._stopped)?'opacity:.5':''}"><div class="period">${periodBadgeText(e.period)}</div><div><b>${esc(e.className)}</b><div class="subtle">${esc(e.grade)}${e.grade==='校务'?` · ${esc(schoolAdminCategory(e))}`:''} · ${esc(e.subject)} · ${periodSlotLabel(e.period)} · ${esc(scheduleEntryTime(e))}${e._mapped?' · 调休映射':''}${e._stopped?' · 临时停课':''}${e._holiday&&!e._mapped?' · 放假':''}</div></div></div>`).join(''):empty('今日暂无课程')}</div>
   <div class="card"><div class="toolbar"><h3 style="margin:0">数据状态</h3><span class="spacer"></span><button class="btn small" onclick="go('settings')">同步设置</button></div><div class="note"><b>${cloudReady()?'云端同步已启用':'当前为本机保存'}</b><div class="subtle">${cloudReady()?esc(cloudStatusText()):'数据已自动写入本机 IndexedDB；配置云端后可跨设备同步。'}</div></div><div class="subtle" style="margin-top:10px">本机数据约 ${fmtBytes(storageUsage())}</div></div></div>`;

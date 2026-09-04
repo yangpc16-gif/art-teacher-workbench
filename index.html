@@ -198,6 +198,15 @@ button,input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink)
 @media(max-width:1180px){.project-layout{grid-template-columns:1fr 1fr}.project-layout>.card:last-child{grid-column:1/-1}}@media(max-width:860px){.att-layout,.project-layout{grid-template-columns:1fr}.project-layout>.card:last-child{grid-column:auto}.project-file-filter{grid-template-columns:1fr}.bonus-label-row{grid-template-columns:1fr 86px auto}}
 
 </style>
+
+<style id="v72-group-style">
+.group-card{position:relative;overflow:hidden}.group-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--group-color,#3c5464)}
+.group-card-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}.group-color-dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.16);flex:0 0 auto}.group-card-head h3{margin:0}.group-card-head .spacer{flex:1}
+.group-member-list{display:flex;flex-wrap:wrap;gap:7px}.group-member-list .pill{border-color:var(--group-color,#3c5464)}
+.group-student-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:320px;overflow:auto;padding:4px 2px}.group-student-choice{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--bg2)}.group-student-choice input{width:auto}
+.seat.grouped{border-style:solid;border-width:2px}.seat .seat-group-name{display:block;font-size:11px;margin-top:4px;opacity:.78}.homework-expired{color:var(--cinnabar);font-weight:700}.homework-expired-note{display:inline-flex;align-items:center;gap:5px;padding:2px 7px;border:1px solid rgba(168,50,50,.35);border-radius:999px;background:rgba(168,50,50,.07);color:var(--cinnabar);font-size:12px}
+@media(max-width:680px){.group-student-picker{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div id="bootFallback" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#f7f2e7;color:#2b2b2b;font-family:"Songti SC","STSong",serif;z-index:99999"><div style="max-width:460px;text-align:center"><div style="font-size:22px;margin-bottom:10px">美术教师智能工作台</div><div style="font-size:14px;color:#606060">正在载入工作台…</div></div></div>
@@ -751,7 +760,16 @@ function deleteWorkSummary(id){const i=DB.workSummaries.findIndex(x=>x.id===id);
 function copyWorkSummary(){const text=$('#summaryEditor')?.value??S.summaryDraft;if(!text.trim())return toast('暂无总结内容');navigator.clipboard?.writeText(text).then(()=>toast('总结已复制')).catch(()=>{const t=$('#summaryEditor');t?.select();document.execCommand('copy');toast('总结已复制')})}
 function summaryDownload(name,content,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function exportWorkSummaryMarkdown(){const range=summaryRange(),text=$('#summaryEditor')?.value??S.summaryDraft;if(!text.trim())return toast('暂无总结内容');const st=S.summaryStats||collectSummaryStats(range.start,range.end),body=`# ${summaryTitle(range)}\n\n${summaryMarkdownData(st)}\n\n## 工作总结正文\n\n${text}`;summaryDownload(`${summaryTitle(range)}.md`,'\uFEFF'+body,'text/markdown;charset=utf-8')}
-function wordHtml(title,text,st=null){return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>body{font-family:"Songti SC","STSong","SimSun",serif;line-height:1.9;font-size:12pt;margin:36pt;color:#222}h1{text-align:center;font-size:20pt}h2{font-size:14pt;margin:18pt 0 8pt}table{border-collapse:collapse;width:100%;margin:8pt 0 14pt;font-size:10.5pt}th,td{border:1px solid #999;padding:6pt 7pt;text-align:center}th{background:#f3efe5}pre{white-space:pre-wrap;font-family:inherit;font-size:12pt}</style></head><body><h1>${esc(title)}</h1>${summaryWordDataHtml(st)}<h2>工作总结正文</h2><pre>${esc(text)}</pre></body></html>`}
+function wordHtml(title,text,st=null){return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>body{font-family:"Songti SC","STSong","SimSun",serif;line-height:1.9;font-size:12pt;margin:36pt;color:#222}h1{text-align:center;font-size:20pt}h2{font-size:14pt;margin:18pt 0 8pt}table{border-collapse:collapse;width:100%;margin:8pt 0 14pt;font-size:10.5pt}th,td{border:1px solid #999;padding:6pt 7pt;text-align:center}th{background:#f3efe5}pre{white-space:pre-wrap;font-family:inherit;font-size:12pt}</style>
+<style id="v72-group-style">
+.group-card{position:relative;overflow:hidden}.group-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--group-color,#3c5464)}
+.group-card-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}.group-color-dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.16);flex:0 0 auto}.group-card-head h3{margin:0}.group-card-head .spacer{flex:1}
+.group-member-list{display:flex;flex-wrap:wrap;gap:7px}.group-member-list .pill{border-color:var(--group-color,#3c5464)}
+.group-student-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:320px;overflow:auto;padding:4px 2px}.group-student-choice{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--bg2)}.group-student-choice input{width:auto}
+.seat.grouped{border-style:solid;border-width:2px}.seat .seat-group-name{display:block;font-size:11px;margin-top:4px;opacity:.78}.homework-expired{color:var(--cinnabar);font-weight:700}.homework-expired-note{display:inline-flex;align-items:center;gap:5px;padding:2px 7px;border:1px solid rgba(168,50,50,.35);border-radius:999px;background:rgba(168,50,50,.07);color:var(--cinnabar);font-size:12px}
+@media(max-width:680px){.group-student-picker{grid-template-columns:1fr}}
+</style>
+</head><body><h1>${esc(title)}</h1>${summaryWordDataHtml(st)}<h2>工作总结正文</h2><pre>${esc(text)}</pre></body></html>`}
 function exportWorkSummaryWord(){const range=summaryRange(),text=$('#summaryEditor')?.value??S.summaryDraft;if(!text.trim())return toast('暂无总结内容');const st=S.summaryStats||collectSummaryStats(range.start,range.end);summaryDownload(`${summaryTitle(range)}.doc`,'\uFEFF'+wordHtml(summaryTitle(range),text,st),'application/msword;charset=utf-8')}
 function exportSavedSummaryWord(id){const x=DB.workSummaries.find(r=>r.id===id);if(!x)return;const st=(x.stats&&x.stats.studentPersonTimes!=null&&x.stats.adminCategories)?x.stats:collectSummaryStats(x.start,x.end);summaryDownload(`${x.title||'工作总结'}.doc`,'\uFEFF'+wordHtml(x.title||'工作总结',x.text||'',st),'application/msword;charset=utf-8')}
 function printWorkSummary(){const range=summaryRange(),text=$('#summaryEditor')?.value??S.summaryDraft;if(!text.trim())return toast('暂无总结内容');const st=S.summaryStats||collectSummaryStats(range.start,range.end),w=window.open('','_blank');if(!w)return toast('浏览器阻止了打印窗口');w.document.write(wordHtml(summaryTitle(range),text,st));w.document.close();setTimeout(()=>w.print(),300)}
@@ -867,6 +885,70 @@ function editProjectFileMeta(id){const p=DB.projects[S.projectCat],f=p.files.fin
 function commitProjectFileMeta(id){const f=DB.projects[S.projectCat].files.find(x=>x.id===id);if(!f)return;f.title=$('#mFileTitle').value.trim()||f.name;f.category=$('#mFileCategory').value;f.date=$('#mFileDate').value;f.schoolYear=$('#mSchoolYear').value.trim();f.tags=$('#mFileTags').value.split(/[,，;；]/).map(x=>x.trim()).filter(Boolean);f.taskId=$('#mFileTask').value||'';f.note=$('#mFileNote').value.trim();save(true);closeModal();renderProjects();toast('档案信息已更新')}
 function deleteProjectFile(id){const a=DB.projects[S.projectCat].files,i=a.findIndex(x=>x.id===id);if(i<0)return;askConfirm('从文件管理中移除这份档案？云端文件会继续保留，以便从回收站恢复索引。',()=>{pushRecycle('projectFile',a[i],{cat:S.projectCat});a.splice(i,1);save(true);renderProjects();toast('档案索引已移入回收站')})}
 function exportProjectFileIndex(){const p=DB.projects[S.projectCat],rows=[['部门','文件类型','档案标题','原文件名','日期','学年度','标签','备注','关联任务','文件大小','云端状态']];(p.files||[]).forEach(f=>{const t=(p.tasks||[]).find(x=>x.id===f.taskId);rows.push([S.projectCat,f.category,f.title||f.name,f.name,f.date,f.schoolYear,(f.tags||[]).join('；'),f.note||'',t?.title||'',f.size||0,f.cloudPath?'已同步':'未同步'])});csvDownload(`${S.projectCat}-档案索引.csv`,rows)}
+
+
+
+/* ===== v7.2 覆盖：分组可编辑/颜色联动座位表 + 过期作业可编辑 ===== */
+const GROUP_DEFAULT_COLORS=['#3c5464','#a83232','#6b7b5a','#8a6f47','#6f5f7f','#4f7b78','#9b6b61','#65748a','#7a6d3f','#5e735f','#8b5d73','#557486'];
+function normalizeGroupColor(color,idx=0){const x=String(color||'').trim();return /^#[0-9a-fA-F]{6}$/.test(x)?x:GROUP_DEFAULT_COLORS[idx%GROUP_DEFAULT_COLORS.length]}
+function ensureGroupMeta(a){
+  if(!a)return [];
+  a.groups=Array.isArray(a.groups)?a.groups:[];
+  a.groupMeta=Array.isArray(a.groupMeta)?a.groupMeta:[];
+  a.groupMeta=a.groups.map((g,i)=>{const old=a.groupMeta[i]||{};return{id:old.id||uid(),name:String(old.name||`第${i+1}组`).trim()||`第${i+1}组`,color:normalizeGroupColor(old.color,i)}});
+  return a.groupMeta;
+}
+function groupInfoForStudent(a,studentId){ensureGroupMeta(a);const gi=(a.groups||[]).findIndex(g=>(g||[]).includes(studentId));if(gi<0)return null;return{index:gi,...a.groupMeta[gi]}}
+function groupColorBg(color,alpha=.12){const x=normalizeGroupColor(color).slice(1),r=parseInt(x.slice(0,2),16),g=parseInt(x.slice(2,4),16),b=parseInt(x.slice(4,6),16);return`rgba(${r},${g},${b},${alpha})`}
+function renderGroups(){
+  const a=currentArt();ensureGroupMeta(a);
+  $('#artBody').innerHTML=`<div class="toolbar"><label>分组数</label><input id="groupCount" type="number" min="2" max="12" value="${a.groups.length||4}" style="width:90px"><button class="btn primary" onclick="randomGroups()">一键随机分组</button><button class="btn" onclick="clearGroups()">清空分组</button></div>${a.groups.length?`<div class="grid three">${a.groups.map((g,gi)=>{const meta=a.groupMeta[gi];return`<div class="card group-card" style="--group-color:${meta.color};background:${groupColorBg(meta.color,.055)}"><div class="group-card-head"><span class="group-color-dot" style="background:${meta.color}"></span><h3>${esc(meta.name)}</h3><span class="spacer"></span><button class="btn small" onclick="editGroup(${gi})">编辑分组</button></div><div class="group-member-list">${g.map(id=>{const i=a.students.findIndex(s=>s.id===id);return`<span class="pill" style="--group-color:${meta.color};background:${groupColorBg(meta.color,.10)}">${esc(i>=0?privacyName(a.students[i].name,i):'已删除')}</span>`}).join(' ')||'<span class="subtle">空组</span>'}</div></div>`}).join('')}</div>`:empty('尚未分组；可先随机分组，再逐组编辑名称、颜色与成员。')}`
+}
+function editGroup(gi){
+  const a=currentArt();ensureGroupMeta(a);if(!a.groups[gi])return;
+  const meta=a.groupMeta[gi],members=new Set(a.groups[gi]||[]);
+  modal('编辑分组',`<div class="grid two"><div class="field"><label>分组名称</label><input id="mGroupName" value="${esc(meta.name)}"></div><div class="field"><label>分组颜色</label><input id="mGroupColor" type="color" value="${esc(meta.color)}"></div></div><div class="field"><label>组内学生</label><div class="group-student-picker">${a.students.map((s,i)=>`<label class="group-student-choice"><input type="checkbox" name="mGroupStudent" value="${s.id}" ${members.has(s.id)?'checked':''}><span>${esc(privacyName(s.name,i))}</span></label>`).join('')}</div><div class="subtle" style="margin-top:7px">保存后，被选中的学生会自动从其他分组移出，确保每名学生只属于一个分组。</div></div>`,`<button class="btn" onclick="closeModal()">取消</button><button class="btn primary" onclick="commitGroup(${gi})">保存</button>`)
+}
+function commitGroup(gi){
+  const a=currentArt();ensureGroupMeta(a);if(!a.groups[gi])return;
+  const name=$('#mGroupName')?.value.trim()||`第${gi+1}组`,color=normalizeGroupColor($('#mGroupColor')?.value,gi),selected=[...document.querySelectorAll('input[name="mGroupStudent"]:checked')].map(x=>x.value);
+  const chosen=new Set(selected);
+  a.groups=a.groups.map((g,i)=>i===gi?selected:(g||[]).filter(id=>!chosen.has(id)));
+  a.groupMeta[gi]={...(a.groupMeta[gi]||{}),id:a.groupMeta[gi]?.id||uid(),name,color};
+  save(true);closeModal();renderArtClass();toast('分组名称、颜色和成员已更新')
+}
+function randomGroups(){
+  const a=currentArt(),n=Math.max(2,Math.min(12,+$('#groupCount').value||4)),arr=a.students.map(s=>s.id).sort(()=>Math.random()-.5),oldMeta=(a.groupMeta||[]).slice();
+  a.groups=Array.from({length:n},()=>[]);arr.forEach((id,i)=>a.groups[i%n].push(id));a.groupMeta=Array.from({length:n},(_,i)=>{const x=oldMeta[i]||{};return{id:x.id||uid(),name:x.name||`第${i+1}组`,color:normalizeGroupColor(x.color,i)}});save(true);renderArtClass();toast('已随机分组，可继续编辑组名、颜色和成员')
+}
+function clearGroups(){const a=currentArt();a.groups=[];a.groupMeta=[];save(true);renderArtClass()}
+function renderSeats(){
+  const a=currentArt();ensureGroupMeta(a);const changed=syncSeatLayout(a);if(changed)save(true);const {rows,cells}=a.seats;
+  $('#artBody').innerHTML=`<div class="toolbar"><span class="pill">${a.students.length}名学生 · 自动 ${rows} 排</span><span class="pill">固定两列</span><span class="pill">座位颜色随分组同步</span><button class="btn primary" onclick="randomSeats()">随机排座</button><button class="btn" onclick="exportSeatsPng()">导出图片</button><button class="btn" onclick="printSeats()">打印 / PDF</button></div><div class="seat-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">${cells.map((id,i)=>{const si=a.students.findIndex(s=>s.id===id),info=id?groupInfoForStudent(a,id):null,color=info?.color||'',bg=info?groupColorBg(color,.13):'';return`<div class="seat ${info?'grouped':''}" style="${info?`border-color:${color};background:${bg}`:''}" onclick="pickSeat(${i})"><span>${id&&si>=0?esc(privacyName(a.students[si].name,si)):'空座位'}${info?`<small class="seat-group-name" style="color:${color}">${esc(info.name)}</small>`:''}</span></div>`}).join('')}</div>`
+}
+function seatExportRows(){
+  const a=currentArt();ensureGroupMeta(a);syncSeatLayout(a);const cls=DB.classes.find(c=>c.id===S.classId),rows=[];
+  for(let r=0;r<a.seats.rows;r++){rows.push([0,1].map(col=>{const id=a.seats.cells[r*2+col],s=a.students.find(x=>x.id===id),info=id?groupInfoForStudent(a,id):null;return{name:s?.name||'空座位',groupName:info?.name||'',color:info?.color||''}}))}
+  return{title:`${cls?.name||'班级'} 座位表`,rows}
+}
+function exportSeatsPng(){
+  const d=seatExportRows(),w=900,rowH=78,pad=55,head=112,h=head+d.rows.length*rowH+pad,cv=document.createElement('canvas');cv.width=w;cv.height=h;const c=cv.getContext('2d');c.fillStyle='#fffaf0';c.fillRect(0,0,w,h);c.fillStyle='#2b2b2b';c.textAlign='center';c.font='bold 30px serif';c.fillText(d.title,w/2,48);c.font='16px serif';c.fillStyle='#606060';c.fillText('讲台 / 黑板方向 · 颜色对应课堂分组',w/2,78);const gap=28,colW=(w-pad*2-gap)/2;
+  d.rows.forEach((row,ri)=>row.forEach((cell,ci)=>{const x=pad+ci*(colW+gap),y=head+ri*rowH;if(cell.color){c.fillStyle=groupColorBg(cell.color,.14);c.fillRect(x,y,colW,rowH-12);c.strokeStyle=cell.color;c.lineWidth=2}else{c.strokeStyle='#7a7468';c.lineWidth=1}c.strokeRect(x,y,colW,rowH-12);c.fillStyle='#2b2b2b';c.font='21px serif';c.fillText(cell.name,x+colW/2,y+30);if(cell.groupName){c.fillStyle=cell.color;c.font='13px serif';c.fillText(cell.groupName,x+colW/2,y+52)}}));
+  const link=document.createElement('a');link.href=cv.toDataURL('image/png');link.download=`${d.title}.png`;link.click();toast('座位表图片已按分组颜色导出')
+}
+function printSeats(){
+  const d=seatExportRows(),w=window.open('','_blank');if(!w)return toast('浏览器阻止了打印窗口');
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>${esc(d.title)}</title><style>body{font-family:serif;margin:30px;color:#222}h1{text-align:center}.front{text-align:center;margin:8px auto 20px;color:#666}.seatprint{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;max-width:700px;margin:auto}.seatprint .cell{border:1px solid #888;padding:12px;text-align:center;font-size:18px;min-height:46px}.seatprint small{display:block;margin-top:5px;font-size:12px}</style><h1>${esc(d.title)}</h1><div class="front">讲台 / 黑板方向 · 颜色对应课堂分组</div><div class="seatprint">${d.rows.flat().map(cell=>`<div class="cell" style="${cell.color?`border:2px solid ${cell.color};background:${groupColorBg(cell.color,.12)}`:''}">${esc(cell.name)}${cell.groupName?`<small style="color:${cell.color}">${esc(cell.groupName)}</small>`:''}</div>`).join('')}</div>`);w.document.close();setTimeout(()=>w.print(),250)
+}
+function homeworkExpired(hw){return !!hw?.deadline&&daysLeft(hw.deadline)<0}
+function renderHomework(){
+  const a=currentArt();const hwId=S.hwId||a.homework[0]?.id;S.hwId=hwId;const hw=a.homework.find(x=>x.id===hwId);
+  $('#artBody').innerHTML=`<div class="toolbar"><button class="btn primary" onclick="editHomework()">新增作业</button>${a.homework.length?`<select onchange="S.hwId=this.value;renderArtClass()">${a.homework.map(h=>`<option value="${h.id}" ${h.id===hwId?'selected':''}>${esc(h.title)}${homeworkExpired(h)?'（已过期）':''}</option>`).join('')}</select>`:''}</div>${hw?renderHomeworkDetail(hw):empty('暂无作业，点击新增')}`
+}
+function renderHomeworkDetail(hw){
+  const a=currentArt(),left=daysLeft(hw.deadline),near=left<=3&&left>=0,expired=homeworkExpired(hw),missing=a.students.filter(s=>(hw.records[s.id]?.status||'missing')==='missing');
+  return `<div class="note" style="margin-bottom:14px"><b>${esc(hw.title)}</b> · ${esc(hw.subject)} · 截止 ${esc(hw.deadline)} ${near?'<span style="color:var(--cinnabar)">临近截止</span>':''} ${expired?'<span class="homework-expired-note">已过期 · 仍可编辑</span>':''}<div class="subtle">${esc(hw.requirement)}</div><div style="margin-top:7px">未交：${missing.length?missing.map(s=>esc(privacyName(s.name,a.students.indexOf(s)))).join('、'):'无'}</div><div class="mini-actions" style="margin-top:8px"><button class="btn small" onclick="editHomework('${hw.id}')">${expired?'编辑过期作业':'编辑作业'}</button><button class="btn small red" onclick="deleteHomework('${hw.id}')">删除作业</button></div></div><div class="table-wrap"><table class="table"><thead><tr><th>学生</th><th>状态</th><th>成绩</th><th>美术作业备注</th></tr></thead><tbody>${a.students.map((s,i)=>{const r=hw.records[s.id]||{status:'missing',score:'',note:''};return `<tr><td>${esc(privacyName(s.name,i))}</td><td><button class="btn small" onclick="cycleHomework('${hw.id}','${s.id}')">${r.status==='missing'?'未交':r.status==='submitted'?'已交':'已批'}</button></td><td>${r.status==='graded'?`<input type="number" min="0" max="100" value="${r.score??''}" oninput="setHomeworkScore('${hw.id}','${s.id}',this.value)">`:'—'}</td><td><input value="${esc(r.note||'')}" oninput="setHomeworkNote('${hw.id}','${s.id}',this.value)"></td></tr>`}).join('')}</tbody></table></div>`
+}
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.altKey&&/^[1-8]$/.test(e.key)){e.preventDefault();const n=navs[+e.key-1];if(n)go(n[0])}if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='l'){e.preventDefault();lockNow()}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&DB?.settings?.lockOnLeave&&DB.settings.passwordHash)S.locked=true;else if(!document.hidden&&S.locked&&!$('#lockLayer'))renderLock()});
